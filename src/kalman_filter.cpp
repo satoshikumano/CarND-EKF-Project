@@ -2,6 +2,7 @@
 #include <cmath>
 
 #include "kalman_filter.h"
+#incldde "tools.h"
 #include <math.h>
 #include <iostream>
 
@@ -62,12 +63,12 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
     * update the state by using Extended Kalman Filter equations
   */
   VectorXd z_pred = VectorXd(3);
-  float px = x_(0);
-  float py = x_(1);
-  float vx = x_(2);
-  float vy = x_(3);
+  float px_d = x_(0);
+  float py_d = x_(1);
+  float vx_d = x_(2);
+  float vy_d = x_(3);
 
-  float norm = sqrt(pow(px,2) + pow(py,2));
+  float norm = sqrt(pow(px_d,2) + pow(py_d,2));
   z_pred(0) = norm;
 
   if (norm == 0) {
@@ -75,12 +76,31 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
     return;
   }
 
-  float rad = atan2(py, px);
-  if (rad < 0) {
-    rad = 2 * M_PI - rad;
-  }
+  float rad = atan2(py_d, px_d);
+  // if (rad < 0) {
+  //   rad = 2 * M_PI - rad;
+  // }
   z_pred(1) = rad;
-  z_pred(3) = (px * vx + py * vy) / norm;
+  z_pred(2) = (px_d * vx_d + py_d * vy_d) / norm;
 
-  VectorXd y = z - z_pred;
+  // VectorXd y = z - z_pred;
+  Tools tools = Tools();
+  MatrixXd Hj = tools.CalculateJacobian(x_);
+
+  float ro = z(0);
+  float phi = z(1);
+  float ro_dot = z(2);
+  px = ro * cos(phi);
+  py = ro * sin(phi);
+  vx = ro_dot * cos(phi);
+  vy = ro_dot * sin(phi);
+
+  MatrixXd x = MatrixXd(4)
+  x(0) = px;
+  x(1) = py;
+  x(2) = vx;
+  x(3) = vy;
+
+  hx = z_pred + Hj * (x - x_);
+
 }
