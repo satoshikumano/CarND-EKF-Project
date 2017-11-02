@@ -2,7 +2,7 @@
 #include <cmath>
 
 #include "kalman_filter.h"
-#incldde "tools.h"
+#include "tools.h"
 #include <math.h>
 #include <iostream>
 
@@ -90,17 +90,17 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   float ro = z(0);
   float phi = z(1);
   float ro_dot = z(2);
-  px = ro * cos(phi);
-  py = ro * sin(phi);
-  vx = ro_dot * cos(phi);
-  vy = ro_dot * sin(phi);
+  float px = ro * cos(phi);
+  float py = ro * sin(phi);
+  float vx = ro_dot * cos(phi);
+  float vy = ro_dot * sin(phi);
 
-  MatrixXd x = MatrixXd(4)
+  VectorXd x = VectorXd(4);
   x(0) = px;
   x(1) = py;
   x(2) = vx;
   x(3) = vy;
 
-  hx = z_pred + Hj * (x - x_);
+  VectorXd hx = z_pred + Hj * (x - x_);
 
 }
