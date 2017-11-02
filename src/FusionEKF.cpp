@@ -47,7 +47,6 @@ FusionEKF::~FusionEKF() {}
 
 void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 
-
   /*****************************************************************************
    *  Initialization
    ****************************************************************************/
@@ -62,7 +61,19 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     cout << "EKF: " << endl;
     ekf_.x_ = VectorXd(4);
     ekf_.x_ << 1, 1, 1, 1;
-
+    ekf_.F_ = MatrixXd(4,4);
+    ekf_.F_ << 1, 0, 0, 0,
+               0, 1, 0, 0,
+               0, 0, 1, 0,
+               0, 0, 0, 1;
+    ekf_.H_ = MatrixXd(2,4);
+    ekf_.H_ << 1, 0, 0, 0,
+               0, 1, 1, 1;
+    ekf_.Q_ =  MatrixXd(4,4);
+    ekf_.Q_ << 0, 0, 0, 0,
+               0, 0, 0, 0,
+               0, 0, 0, 0,
+               0, 0, 0, 0;
     if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
       /**
       Convert radar from polar to cartesian coordinates and initialize state.
@@ -103,7 +114,16 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
      * Update the process noise covariance matrix.
      * Use noise_ax = 9 and noise_ay = 9 for your Q matrix.
    */
-
+  long long dt = measurement_pack.timestamp_ - previous_timestamp_;
+  ekf_.F_(0, 2) = dt;
+  ekf_.F_(1, 3) = dt;
+  float dt4div4 = pow(dt, 4)/3;
+  float dt3div2 = pow(dt, 3)/2;
+  float dt2 = pow(dt, 2);
+  ekf_.Q_ << dt4div4 * noise_ax_, 0, dt3div2 * noise_ax_, 0,
+            0, dt4div4 * noise_ay_, 0, dt3div2 * noise_ay_,
+            dt3div2 * noise_ax_, 0, dt2 * noise_ax_, 0,
+            0, dt3div2 * noise_ay_ , 0, dt2 * noise_ay_;
   ekf_.Predict();
 
   /*****************************************************************************
@@ -127,4 +147,5 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
   // print the output
   cout << "x_ = " << ekf_.x_ << endl;
   cout << "P_ = " << ekf_.P_ << endl;
+  previous_timestamp_ = measurement_pack.timestamp_;
 }
