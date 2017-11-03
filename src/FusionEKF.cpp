@@ -39,11 +39,6 @@ FusionEKF::FusionEKF() {
   ekf_ = KalmanFilter();
   noise_ax_ = 9;
   noise_ay_ = 9;
-  ekf_.P_ = MatrixXd(4, 4);
-	ekf_.P_ << 1, 0, 0, 0,
-			       0, 1, 0, 0,
-			       0, 0, 1000, 0,
-			       0, 0, 0, 1000;
 }
 
 /**
@@ -65,19 +60,9 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     */
     // first measurement
     cout << "EKF: " << endl;
-    ekf_.x_ = VectorXd(4);
-    ekf_.x_ << 1, 1, 1, 1;
-    ekf_.F_ = MatrixXd(4,4);
-    ekf_.F_ << 1, 0, 0, 0,
-               0, 1, 0, 0,
-               0, 0, 1, 0,
-               0, 0, 0, 1;
-    ekf_.H_ = MatrixXd(2,4);
-    ekf_.H_ << 1, 0, 0, 0,
-               0, 1, 0, 0;
-    ekf_.Q_ =  MatrixXd(4,4);
 
     if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
+      cout << "kanya2: " << endl;
       /**
       Convert radar from polar to cartesian coordinates and initialize state.
       */
@@ -86,8 +71,10 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
       float ro_dot = measurement_pack.raw_measurements_(2);
       float px = ro * cos(phi);
       float py = ro * sin(phi);
-      ekf_.x_ << px, py, 0, 0;
-      ekf_.R_ = R_radar_;
+      ekf_.x_(0) = px;
+      ekf_.x_(1) = py;
+      ekf_.x_(2) = 0;
+      ekf_.x_(3) = 0;
     }
     else if (measurement_pack.sensor_type_ == MeasurementPackage::LASER) {
       /**
@@ -95,19 +82,21 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
       */
       float px = measurement_pack.raw_measurements_(0);
       float py = measurement_pack.raw_measurements_(1);
-      ekf_.x_ << px, py, 0, 0;
-      ekf_.R_ = R_laser_;
+      ekf_.x_(0) = px;
+      ekf_.x_(1) = py;
+      ekf_.x_(2) = 0;
+      ekf_.x_(3) = 0;
     }
 
     // done initializing, no need to predict or update
     is_initialized_ = true;
+    previous_timestamp_ = measurement_pack.timestamp_;
     return;
   }
 
   /*****************************************************************************
    *  Prediction
    ****************************************************************************/
-
   /**
    TODO:
      * Update the state transition matrix F according to the new elapsed time.
@@ -138,13 +127,18 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
    */
 
   if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
+    cout << "kanya7: " << endl;
     // Radar updates
+    ekf_.R_ = R_radar_;
     ekf_.UpdateEKF(measurement_pack.raw_measurements_);
   } else {
+    cout << "kanya8: " << endl;
     // Laser updates
+    ekf_.R_ = R_laser_;
     ekf_.Update(measurement_pack.raw_measurements_);
   }
 
+  cout << "kanya9: " << endl;
   // print the output
   cout << "x_ = " << ekf_.x_ << endl;
   cout << "P_ = " << ekf_.P_ << endl;
