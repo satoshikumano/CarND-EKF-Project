@@ -76,10 +76,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     ekf_.H_ << 1, 0, 0, 0,
                0, 1, 0, 0;
     ekf_.Q_ =  MatrixXd(4,4);
-    ekf_.Q_ << 0, 0, 0, 0,
-               0, 0, 0, 0,
-               0, 0, 0, 0,
-               0, 0, 0, 0;
+
     if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
       /**
       Convert radar from polar to cartesian coordinates and initialize state.
