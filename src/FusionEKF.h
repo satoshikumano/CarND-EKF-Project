@@ -9,39 +9,39 @@
 #include "kalman_filter.h"
 
 class FusionEKF {
-public:
-  /**
-  * Constructor.
-  */
-  FusionEKF();
+  public:
+    /**
+     * Constructor.
+     */
+    FusionEKF();
 
-  /**
-  * Destructor.
-  */
-  virtual ~FusionEKF();
+    /**
+     * Destructor.
+     */
+    virtual ~FusionEKF();
 
-  /**
-  * Run the whole flow of the Kalman Filter from here.
-  */
-  void ProcessMeasurement(const MeasurementPackage &measurement_pack);
+    /**
+     * Run the whole flow of the Kalman Filter from here.
+     */
+    void ProcessMeasurement(const MeasurementPackage &measurement_pack);
 
-  /**
-  * Kalman Filter update and prediction math lives in here.
-  */
-  KalmanFilter ekf_;
+    /**
+     * Kalman Filter update and prediction math lives in here.
+     */
+    KalmanFilter ekf_;
 
-private:
-  // check whether the tracking toolbox was initialized or not (first measurement)
-  bool is_initialized_;
+  private:
+    // check whether the tracking toolbox was initialized or not (first measurement)
+    bool is_initialized_;
 
-  // previous timestamp
-  long long previous_timestamp_;
+    // previous timestamp
+    long long previous_timestamp_;
 
-  Eigen::MatrixXd R_laser_;
-  Eigen::MatrixXd R_radar_;
+    Eigen::MatrixXd R_laser_;
+    Eigen::MatrixXd R_radar_;
 
-  float noise_ax_;
-	float noise_ay_;
+    float noise_ax_;
+    float noise_ay_;
 
 };
 
