@@ -108,7 +108,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
   long long dt = measurement_pack.timestamp_ - previous_timestamp_;
   ekf_.F_(0, 2) = dt;
   ekf_.F_(1, 3) = dt;
-  float dt4div4 = pow(dt, 4)/3;
+  float dt4div4 = pow(dt, 4)/4;
   float dt3div2 = pow(dt, 3)/2;
   float dt2 = pow(dt, 2);
   ekf_.Q_ << dt4div4 * noise_ax_, 0, dt3div2 * noise_ax_, 0,
