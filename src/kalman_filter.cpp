@@ -105,7 +105,7 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   hx(2) = (px_d * vx_d + py_d * vy_d) / norm;
 
   // VectorXd y = z - z_pred;
-  Tools tools = Tools();
+  Tools tools;
   MatrixXd Hj = tools.CalculateJacobian(x_);
   cout << "Hj: " << Hj << endl;
 
