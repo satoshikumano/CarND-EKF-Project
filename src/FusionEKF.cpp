@@ -36,8 +36,14 @@ FusionEKF::FusionEKF() {
     * Finish initializing the FusionEKF.
     * Set the process and measurement noises
   */
+  ekf_ = KalmanFilter();
   noise_ax_ = 9;
   noise_ay_ = 9;
+  ekf_.P_ = MatrixXd(4, 4);
+	ekf_.P_ << 1, 0, 0, 0,
+			       0, 1, 0, 0,
+			       0, 0, 1000, 0,
+			       0, 0, 0, 1000;
 }
 
 /**
@@ -68,7 +74,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
                0, 0, 0, 1;
     ekf_.H_ = MatrixXd(2,4);
     ekf_.H_ << 1, 0, 0, 0,
-               0, 1, 1, 1;
+               0, 1, 0, 0;
     ekf_.Q_ =  MatrixXd(4,4);
     ekf_.Q_ << 0, 0, 0, 0,
                0, 0, 0, 0,
@@ -83,9 +89,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
       float ro_dot = measurement_pack.raw_measurements_(2);
       float px = ro * cos(phi);
       float py = ro * sin(phi);
-      float vx = ro_dot * cos(phi);
-      float vy = ro_dot * sin(phi);
-      ekf_.x_ << px, py, vx, vy;
+      ekf_.x_ << px, py, 0, 0;
       ekf_.R_ = R_radar_;
     }
     else if (measurement_pack.sensor_type_ == MeasurementPackage::LASER) {
