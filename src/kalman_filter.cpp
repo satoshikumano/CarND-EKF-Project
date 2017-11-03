@@ -87,7 +87,6 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   float vx_d = x_(2);
   float vy_d = x_(3);
 
-  cout << "UpdateEKF2" << endl;
   float norm = sqrt(pow(px_d,2) + pow(py_d,2));
   z_pred(0) = norm;
 
