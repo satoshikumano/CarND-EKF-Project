@@ -86,20 +86,17 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   float vx_d = x_(2);
   float vy_d = x_(3);
 
-  float norm = sqrt(pow(px_d,2) + pow(py_d,2));
-
-  if (norm == 0) {
-    cout << "Can't update EKF. norm == 0" << endl;
-    return;
+  float eps = 0.000001;
+  if (fabs(px_d) < eps) {
+    px_d = eps;
+  }
+  if (fabs(py_d)< eps) {
+    py_d = eps;
   }
 
-  float rad;
-  if (px_d != 0) {
-    rad = atan2(py_d, px_d);
-  } else {
-    rad = atan2(py_d, 0.001);
-  }
+  float norm = sqrtf(powf(px_d,2) + powf(py_d,2));
 
+  float rad = atan2f(py_d, px_d);
   cout << "rad: " << rad << endl;
 
   VectorXd hx = VectorXd(3);
@@ -112,21 +109,9 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   MatrixXd Hj = tools.CalculateJacobian(x_);
   cout << "Hj: " << Hj << endl;
 
-  float ro = z(0);
-  float phi = z(1);
-  float ro_dot = z(2);
-  float px = ro * cos(phi);
-  float py = ro * sin(phi);
-  float vx = ro_dot * cos(phi);
-  float vy = ro_dot * sin(phi);
+  VectorXd y = z - hx;
+  y[1] -= (2 * M_PI) * floor((y[1] + M_PI) / (2 * M_PI));
 
-  VectorXd x = VectorXd(4);
-  x(0) = px;
-  x(1) = py;
-  x(2) = vx;
-  x(3) = vy;
-
-  VectorXd y = hx + Hj * (x - x_);
   MatrixXd Hjt = Hj.transpose();
 	MatrixXd S = Hj * P_ * Hjt + R_;
 	MatrixXd Si = S.inverse();
