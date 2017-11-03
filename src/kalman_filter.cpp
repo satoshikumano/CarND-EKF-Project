@@ -110,7 +110,11 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   cout << "Hj: " << Hj << endl;
 
   VectorXd y = z - hx;
-  y[1] -= (2 * M_PI) * floor((y[1] + M_PI) / (2 * M_PI));
+  // Normalize angle. [-pi, pi]
+  while (y(1) < -M_PI)
+  	y(1) += 2 * M_PI;
+  while (y(1) > M_PI)
+  	y(1) -= 2 * M_PI;
 
   MatrixXd Hjt = Hj.transpose();
 	MatrixXd S = Hj * P_ * Hjt + R_;
