@@ -81,24 +81,31 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   TODO:
     * update the state by using Extended Kalman Filter equations
   */
-  VectorXd z_pred = VectorXd(3);
   float px_d = x_(0);
   float py_d = x_(1);
   float vx_d = x_(2);
   float vy_d = x_(3);
 
   float norm = sqrt(pow(px_d,2) + pow(py_d,2));
-  z_pred(0) = norm;
 
   if (norm == 0) {
     cout << "Can't update EKF. norm == 0" << endl;
     return;
   }
 
-  float rad = atan2(py_d, px_d);
+  float rad;
+  if (px_d != 0) {
+    rad = atan2(py_d, px_d);
+  } else {
+    rad = atan2(py_d, 0.001);
+  }
+
   cout << "rad: " << rad << endl;
-  z_pred(1) = rad;
-  z_pred(2) = (px_d * vx_d + py_d * vy_d) / norm;
+
+  VectorXd hx = VectorXd(3);
+  hx(0) = norm;
+  hx(1) = rad;
+  hx(2) = (px_d * vx_d + py_d * vy_d) / norm;
 
   // VectorXd y = z - z_pred;
   Tools tools = Tools();
@@ -119,7 +126,7 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   x(2) = vx;
   x(3) = vy;
 
-  VectorXd y = z_pred + Hj * (x - x_);
+  VectorXd y = hx + Hj * (x - x_);
   MatrixXd Hjt = Hj.transpose();
 	MatrixXd S = Hj * P_ * Hjt + R_;
 	MatrixXd Si = S.inverse();
